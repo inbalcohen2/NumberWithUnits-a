@@ -12,6 +12,7 @@ namespace ariel{
           string str;
 
           double convert(const string& f ,const string& t , double val);
+          
           friend bool check( NumberWithUnits const & l, NumberWithUnits const & r );
           public:
           NumberWithUnits(double val ,string str){

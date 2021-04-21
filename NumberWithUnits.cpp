@@ -12,19 +12,25 @@ namespace ariel{
   }
 
   bool check( NumberWithUnits const & l, NumberWithUnits const & r ) {
-    if( (l.str==r.str) 
-          || (("km"==l.str&&"m"==r.str) || ("km"==r.str&&"m"==l.str))
-          || (("km"==l.str&&"cm"==r.str) || ("km"==r.str&&"cm"==l.str))
-          || (("m"==l.str&&"cm"==r.str) || ("m"==r.str&&"cm"==l.str))
-          || (("kg"==l.str&&"ton"==r.str) || ("ton"==l.str&&"kg"==r.str))
-          || (("kg"==l.str&&"g"==r.str) || ("g"==l.str&&"kg"==r.str))
-          || (("g"==l.str&&"ton"==r.str) || ("ton"==l.str&&"g"==r.str))
-          ||(("hour"==l.str&&"min"==r.str) || ("min"==l.str&&"hour"==r.str))
-          ||(("hour"==l.str&&"sec"==r.str) || ("sec"==l.str&&"hour"==r.str))
-          ||(("sec"==l.str&&"min"==r.str) || ("min"==l.str&&"sec"==r.str))){
-            return false; return true;
-          }
-      return true;
+    if((l.str==r.str) && map.find(l.str) != map.end()) {return false;}
+    if ( map.find(l.str) != map.end() && (map[l.str].find(r.str) != map[l.str].end())) {
+                    return false;
+            }
+    return true;
+  }
+
+
+  void casting(const string &str1 ,const string &str2){
+    for (auto& p : map[str1]){
+      double cast=map[str2][str1] * p.second;
+      map[str2][p.first]= cast;
+      map[p.first][str2]= 1/cast;
+  }
+    for (auto& p : map[str2]){
+      double cast=map[str1][str2] * p.second;
+      map[str1][p.first]= cast;
+      map[p.first][str1]= 1/cast;
+  }
   }
 
   void NumberWithUnits::read_units(ifstream& input){
@@ -36,6 +42,8 @@ namespace ariel{
         while(input >> val1 >> str1 >> other >> val2 >> str2){
             map[str1][str2]=val2;
             map[str2][str1]=1/val2;
+
+            casting(str1,str2);
     }
   }
 
@@ -53,7 +61,7 @@ namespace ariel{
         return NumberWithUnits((-1*val.val),val.str);
       }
         return NumberWithUnits(val.val,val.str);
-  
+
    }
 
    NumberWithUnits operator+=( NumberWithUnits& l, const NumberWithUnits& r ){
@@ -135,18 +143,18 @@ namespace ariel{
 
    bool operator>( NumberWithUnits const & l, NumberWithUnits const & r ){
       if(check(l,r)){  __throw_invalid_argument("Eror not same type");}
-     
+
        double conv=convert(l.str,r.str,r.val);
        if(l.val > conv){
          return true;  return false;
        }
          return false;
-     
+
    }
 
    bool operator>=( NumberWithUnits const & l, NumberWithUnits const & r ){
       if(check(l,r)) {         __throw_invalid_argument("Eror not same type");}
-     
+
        double conv=convert(l.str,r.str,r.val);
        if(l.val >= conv){
          return true;  return false;
@@ -154,10 +162,10 @@ namespace ariel{
        }
          return false;
 
-     
+
    }
   //********************** ++ -- *******************************
-  
+
      //val--
     NumberWithUnits operator--( NumberWithUnits & val, int ){
         return NumberWithUnits(val.val--,val.str);
